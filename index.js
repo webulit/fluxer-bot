@@ -3,19 +3,13 @@ import { Client, Events, parsePrefixCommand } from '@fluxerjs/core';
 import { migrate } from './src/db.js';
 import commands from './src/commands/index.js';
 import { awardXp } from './src/commands/leveling.js';
+import { registerWelcomeEvents } from './src/commands/welcome.js';
 
 if (!process.env.DATABASE_URL) {
-  console.error('DATABASE_URL is not set. Related environment variables received:');
-  const related = Object.keys(process.env)
-    .filter((key) => /DATABASE|PG|FLUXER/i.test(key))
-    .sort();
-  if (related.length === 0) {
-    console.error('  (none matching DATABASE, PG, or FLUXER)');
-  }
-  for (const key of related) {
-    // Log names and value lengths only, to avoid leaking secrets such as tokens.
-    console.error(`  ${key} (length ${(process.env[key] || '').length})`);
-  }
+  console.error(
+    'DATABASE_URL is missing. Related vars seen:',
+    Object.keys(process.env).filter((k) => /DATABASE|PG|FLUXER/.test(k)),
+  );
   process.exit(1);
 }
 
@@ -29,6 +23,7 @@ for (const cmd of commands) {
 }
 
 client.on(Events.Ready, () => console.log('Bot is online'));
+registerWelcomeEvents(client);
 
 client.on(Events.MessageCreate, async (message) => {
   if (message.author.bot || !message.content) return;
