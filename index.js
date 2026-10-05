@@ -1,4 +1,3 @@
-import 'dotenv/config';
 import { Client, Events, parsePrefixCommand } from '@fluxerjs/core';
 import { migrate } from './src/db.js';
 import commands from './src/commands/index.js';
