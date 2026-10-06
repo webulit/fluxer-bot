@@ -28,7 +28,7 @@ export function startGameNewsServer(client) {
     // Health check for Railway
     if (req.method === 'GET' && req.url === '/health') {
       res.writeHead(200, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ ok: true }));
+      res.end(JSON.stringify({ gameNewsServer: 'ALIVE', source: 'fluxer-bot' }));
       return;
     }
 
