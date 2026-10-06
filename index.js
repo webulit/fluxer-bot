@@ -9,8 +9,11 @@ import { startGameNewsServer } from './src/gameNews.js';
 if (!process.env.DATABASE_URL) {
   console.error(
     'DATABASE_URL is missing. Related vars seen:',
-    Object.keys(process.env).filter((k) => /DATABASE|PG|FLUXER/.test(k)),
+    Object.keys(process.env).filter((k) =>
+      /DATABASE|PG|FLUXER/.test(k),
+    ),
   );
+
   process.exit(1);
 }
 
@@ -20,38 +23,110 @@ const client = new Client();
 startGameNewsServer(client);
 
 const registry = new Map();
+
 for (const cmd of commands) {
   registry.set(cmd.name, cmd);
-  for (const alias of cmd.aliases ?? []) registry.set(alias, cmd);
+
+  for (const alias of cmd.aliases ?? []) {
+    registry.set(alias, cmd);
+  }
 }
 
-client.on(Events.Ready, () => console.log('Bot is online'));
+client.on(Events.Ready, () => {
+  console.log('Bot is online');
+  console.log(`Command prefix: ${PREFIX}`);
+  console.log(
+    `Registered commands: ${Array.from(registry.keys()).join(', ')}`,
+  );
+});
+
 registerWelcomeEvents(client);
 
 client.on(Events.MessageCreate, async (message) => {
-  if (message.author.bot || !message.content) return;
+  console.log(
+    'MESSAGE_CREATE:',
+    message.author?.username,
+    JSON.stringify(message.content),
+  );
 
-  const parsed = parsePrefixCommand(message.content, PREFIX);
+  if (message.author.bot || !message.content) {
+    return;
+  }
+
+  const parsed = parsePrefixCommand(
+    message.content,
+    PREFIX,
+  );
+
+  console.log(
+    'PARSED_COMMAND:',
+    parsed
+      ? JSON.stringify({
+          command: parsed.command,
+          args: parsed.args,
+        })
+      : 'null',
+  );
+
   if (!parsed) {
-    if (message.guildId) awardXp(message).catch(console.error);
+    if (message.guildId) {
+      awardXp(message).catch(console.error);
+    }
+
     return;
   }
 
   const cmd = registry.get(parsed.command);
-  if (!cmd) return;
+
+  console.log(
+    'COMMAND_LOOKUP:',
+    parsed.command,
+    cmd ? 'FOUND' : 'NOT FOUND',
+  );
+
+  if (!cmd) {
+    return;
+  }
 
   if (cmd.guildOnly && !message.guildId) {
-    await message.reply('This command only works in a server.');
+    await message.reply(
+      'This command only works in a server.',
+    );
+
     return;
   }
 
   try {
-    await cmd.run({ message, args: parsed.args, prefix: PREFIX, commands });
+    console.log(
+      `Executing command: ${parsed.command}`,
+    );
+
+    await cmd.run({
+      message,
+      args: parsed.args,
+      prefix: PREFIX,
+      commands,
+    });
+
+    console.log(
+      `Command completed: ${parsed.command}`,
+    );
   } catch (err) {
-    console.error(`Error in ${cmd.name}:`, err);
-    await message.reply('Something went wrong running that command.').catch(() => {});
+    console.error(
+      `Error in ${cmd.name}:`,
+      err,
+    );
+
+    await message
+      .reply(
+        'Something went wrong running that command.',
+      )
+      .catch(() => {});
   }
 });
 
 await migrate();
-await client.login(process.env.FLUXER_BOT_TOKEN);
+
+await client.login(
+  process.env.FLUXER_BOT_TOKEN,
+);
