@@ -10,14 +10,14 @@ import utility from './utility.js';
 import welcome from './welcome.js';
 
 export default [
-  economy,
-  fun,
-  games,
-  leveling,
-  moderation,
-  modtools,
-  shop,
-  todo,
-  utility,
-  welcome,
+  ...economy,
+  ...fun,
+  ...games,
+  ...leveling,
+  ...moderation,
+  ...modtools,
+  ...shop,
+  ...todo,
+  ...utility,
+  ...welcome,
 ];
