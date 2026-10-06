@@ -4,6 +4,7 @@ import { migrate } from './src/db.js';
 import commands from './src/commands/index.js';
 import { awardXp } from './src/commands/leveling.js';
 import { registerWelcomeEvents } from './src/commands/welcome.js';
+import { startGameNewsServer } from './src/gameNews.js';
 
 if (!process.env.DATABASE_URL) {
   console.error(
@@ -15,6 +16,8 @@ if (!process.env.DATABASE_URL) {
 
 const PREFIX = process.env.PREFIX || '!';
 const client = new Client();
+
+startGameNewsServer(client);
 
 const registry = new Map();
 for (const cmd of commands) {
