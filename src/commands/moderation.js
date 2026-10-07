@@ -131,7 +131,8 @@ export default [
           communication_disabled_until: new Date(Date.now() + seconds * 1000).toISOString(),
           timeout_reason: reason,
         });
-        await logAction(message, 'timeout', userId, reason);\n        await message.reply(`Timed out <@${userId}> for **${args[1]}**.`);
+        await logAction(message, 'timeout', userId, reason);
+        await message.reply(`Timed out <@${userId}> for **${args[1]}**.`);
       } catch (err) {
         console.error('timeout failed:', err);
         await message.reply("I couldn't timeout that user (check my permissions and role position).");
