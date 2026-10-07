@@ -8,6 +8,7 @@ import shop from './shop.js';
 import todo from './todo.js';
 import utility from './utility.js';
 import welcome from './welcome.js';
+import verification from './verification.js';
 
 export default [
   ...economy,
@@ -20,4 +21,5 @@ export default [
   ...todo,
   ...utility,
   ...welcome,
+  ...verification,
 ];
