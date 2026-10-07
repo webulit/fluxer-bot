@@ -4,6 +4,7 @@ import { migrate } from './src/db.js';
 import commands from './src/commands/index.js';
 import { awardXp } from './src/commands/leveling.js';
 import { registerWelcomeEvents } from './src/commands/welcome.js';
+import { registerVerificationEvents } from './src/commands/verification.js';
 import { startGameNewsServer } from './src/gameNews.js';
 
 if (!process.env.DATABASE_URL) {
@@ -41,6 +42,7 @@ client.on(Events.Ready, () => {
 });
 
 registerWelcomeEvents(client);
+registerVerificationEvents(client);
 
 client.on(Events.MessageCreate, async (message) => {
   console.log(
