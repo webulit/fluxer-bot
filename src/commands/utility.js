@@ -55,7 +55,7 @@ export default [
           .sort((a, b) => a.name.localeCompare(b.name))
           .map((c) => prefix + c.name + ' - ' + (c.description ?? 'No description available.'));
 
-        return message.reply('**' + want + ' commands**\\n' + lines.join('\\n'));
+        return message.reply('**' + want + ' commands**\\n' + lines.join('\n'));
       }
 
       const cats = [...groups.entries()]
@@ -63,7 +63,7 @@ export default [
         .map(([category, list]) => prefix + 'help ' + category + ' - ' + list.length + ' commands');
 
       return message.reply(
-        '**Help categories**\\n\\n' + cats.join('\\n') + '\\n\\nUse ' + prefix + 'help <category> to view a category.'
+        '**Help categories**\\n\\n' + cats.join('\n') + '\\n\\nUse ' + prefix + 'help <category> to view a category.'
       );
     },
   },
