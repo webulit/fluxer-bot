@@ -37,6 +37,12 @@ export async function migrate() {
       autorole_id      TEXT
     );
 
+    CREATE TABLE IF NOT EXISTS autoroles (
+      guild_id TEXT NOT NULL,
+      role_id  TEXT NOT NULL,
+      PRIMARY KEY (guild_id, role_id)
+    );
+
     CREATE TABLE IF NOT EXISTS todos (
       id      SERIAL PRIMARY KEY,
       user_id TEXT NOT NULL,
