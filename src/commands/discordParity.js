@@ -109,7 +109,8 @@ add('purge','Purge recent messages: purge <1-100>',async({message,args})=>{
   const channel=await getChannel(message);
   try {
     await channel.bulkDelete(amount+1);
-    await channel.send('🧹 Deleted '+amount+' messages.');
+    const confirmation=await channel.send('🧹 Deleted '+amount+' messages.');
+    setTimeout(()=>confirmation.delete?.().catch?.(()=>{}),3000);
   } catch (err) {
     console.error('purge failed:',err);
     await message.reply("I couldn't purge messages. Make sure I have View Channel, Read Message History, and Manage Messages permissions.");
