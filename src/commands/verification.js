@@ -1,7 +1,79 @@
-import { requirePerm, MANAGE } from '../util.js';
+import { Events } from '@fluxerjs/core';
+import { requirePerm, MANAGE } from './util.js';
 
 const VERIFY_EMOJI = '✅';
 const MEMBER_ROLE_NAME = 'Member';
+
+export function registerVerificationEvents(client) {
+  client.on(Events.MessageReactionAdd, async (reaction, user) => {
+    try {
+      if (user?.bot) return;
+
+      const message = reaction?.message;
+      if (!message) return;
+
+      const emoji =
+        reaction.emoji?.name ??
+        reaction.emoji ??
+        '';
+
+      if (emoji !== VERIFY_EMOJI) return;
+
+      const guildId =
+        message.guildId ??
+        message.guild?.id;
+
+      if (!guildId) return;
+
+      const guild =
+        message.guild ??
+        client.guilds.get(guildId);
+
+      if (!guild) return;
+
+      const roles = await guild.roles.fetch();
+
+      const memberRole = roles.find(
+        (role) => role.name === MEMBER_ROLE_NAME,
+      );
+
+      if (!memberRole) {
+        console.error(
+          `Verification role "${MEMBER_ROLE_NAME}" was not found.`,
+        );
+
+        return;
+      }
+
+      const userId =
+        user.id ??
+        user.user?.id;
+
+      if (!userId) return;
+
+      const member = await guild.members.fetch(userId);
+
+      if (!member) return;
+
+      const hasRole =
+        member.roles?.cache?.has?.(memberRole.id) ??
+        false;
+
+      if (hasRole) return;
+
+      await member.roles.add(memberRole.id);
+
+      console.log(
+        `Verified ${user.username ?? userId} in ${guildId}`,
+      );
+    } catch (err) {
+      console.error(
+        'Verification reaction error:',
+        err,
+      );
+    }
+  });
+}
 
 export default [
   {
@@ -15,10 +87,13 @@ export default [
       const guild = message.guild;
 
       if (!guild) {
-        return message.reply('This command can only be used in a server.');
+        return message.reply(
+          'This command can only be used in a server.',
+        );
       }
 
       const roles = await guild.roles.fetch();
+
       const memberRole = roles.find(
         (role) => role.name === MEMBER_ROLE_NAME,
       );
@@ -38,7 +113,9 @@ export default [
 
       await sent.react(VERIFY_EMOJI);
 
-      return message.reply('Verification panel posted.');
+      return message.reply(
+        'Verification panel posted.',
+      );
     },
   },
 ];
