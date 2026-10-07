@@ -1,11 +1,4 @@
-const pick = (arr) => arr[Math.floor(Math.random() * arr.length)  {
-    name: 'coinflip',
-    aliases: ['cf'],
-    description: 'Flip a coin: coinflip',
-    run: ({ message }) =>
-      message.reply(Math.random() < 0.5 ? '🪙 Heads!' : '🪙 Tails!'),
-  },
-];
+const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
 
 const BALL = [
   'It is certain.', 'Without a doubt.', 'Yes, definitely.', 'Most likely.', 'Signs point to yes.',
@@ -41,5 +34,12 @@ export default [
       if (options.length < 2) return message.reply('Give me at least two options separated by commas.');
       return message.reply(`I choose: **${pick(options)}**`);
     },
+  },
+  {
+    name: 'coinflip',
+    aliases: ['cf'],
+    description: 'Flip a coin: coinflip',
+    run: ({ message }) =>
+      message.reply(Math.random() < 0.5 ? '🪙 Heads!' : '🪙 Tails!'),
   },
 ];
