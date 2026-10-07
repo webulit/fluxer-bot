@@ -38,16 +38,25 @@ function findMemberRole(guild) {
 export function registerVerificationEvents(client) {
   ensureTable().catch((err) => console.error('verification: could not create table:', err));
 
-  client.on(Events.MessageReactionAdd, async (reaction, user) => {
+  // Fluxer.js v3 hands this event ONE payload object with messageId, userId,
+  // emoji, user, member and reaction on it. Older docs show (reaction, user),
+  // so both shapes are handled.
+  client.on(Events.MessageReactionAdd, async (payload, extraUser) => {
     try {
-      if (user?.bot) return;
-      if (reaction.emoji?.name !== VERIFY_EMOJI) return;
+      const reaction = payload?.reaction ?? payload;
+      const reactor = payload?.user ?? extraUser;
 
-      const messageId = reaction.message?.id ?? reaction.messageId;
-      if (!messageId) {
-        console.error('verification: reaction has no message id. Keys:', Object.keys(reaction ?? {}));
+      const userId = payload?.userId ?? reactor?.id;
+      const emojiName = payload?.emoji?.name ?? reaction?.emoji?.name;
+      const messageId = payload?.messageId ?? reaction?.messageId ?? reaction?.message?.id;
+
+      if (!userId || !messageId) {
+        console.error('verification: could not read the reaction. Got:', describe(payload), describe(extraUser));
         return;
       }
+
+      if (emojiName !== VERIFY_EMOJI) return;
+      if (reactor?.bot || userId === client.user?.id) return;
 
       await ensureTable();
       const { rows } = await pool.query(
@@ -58,14 +67,25 @@ export function registerVerificationEvents(client) {
 
       const { guild_id: guildId, role_id: roleId } = rows[0];
       const guild = client.guilds.get(guildId) ?? (await client.guilds.resolve(guildId));
-      const member = guild.members.get(user.id) ?? (await guild.fetchMember(user.id));
+      const member = guild.members.get(userId) ?? (await guild.fetchMember(userId));
 
       await member.roles.add(roleId);
-      console.log(`verification: gave role ${roleId} to ${user.id}`);
+      console.log(`verification: gave role ${roleId} to ${userId}`);
     } catch (err) {
       console.error('verification error:', err);
     }
   });
+}
+
+// Short description of an object for the console, used only when something is unexpected.
+function describe(obj) {
+  if (!obj || typeof obj !== 'object') return String(obj);
+  return JSON.stringify(
+    Object.fromEntries(
+      Object.entries(obj).map(([k, v]) => [k, v && typeof v === 'object' ? `[${v.constructor?.name ?? 'object'}]` : v]),
+    ),
+    (_k, v) => (typeof v === 'bigint' ? String(v) : v),
+  );
 }
 
 export default [
