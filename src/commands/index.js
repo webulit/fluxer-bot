@@ -9,6 +9,7 @@ import todo from './todo.js';
 import utility from './utility.js';
 import welcome from './welcome.js';
 import verification from './verification.js';
+import discordParity from './discordParity.js';
 
 export default [
   ...economy,
@@ -22,4 +23,5 @@ export default [
   ...utility,
   ...welcome,
   ...verification,
+  ...discordParity,
 ];
