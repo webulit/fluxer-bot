@@ -115,7 +115,7 @@ export default [
       if (!(await allowed(message, PermissionFlags.ModerateMembers))) return;
       const userId = parseUserMention(args[0] ?? '');
       const match = String(args[1] ?? '').match(/^(\d+)(s|m|h|d)$/i);
-      if (!userId || !match) return message.reply('Usage: \`timeout @user <10s|10m|1h|1d> [reason]\`');
+      if (!userId || !match) return message.reply('Usage: `timeout @user <10s|10m|1h|1d> [reason]`');
       const value = Number(match[1]);
       const multiplier = { s: 1, m: 60, h: 3600, d: 86400 }[match[2].toLowerCase()];
       const seconds = value * multiplier;
@@ -131,7 +131,7 @@ export default [
           communication_disabled_until: new Date(Date.now() + seconds * 1000).toISOString(),
           timeout_reason: reason,
         });
-        await message.reply(\`Timed out <@\${userId}> for **\${args[1]}**.\`);
+        await logAction(message, 'timeout', userId, reason);\n        await message.reply(`Timed out <@${userId}> for **${args[1]}**.`);
       } catch (err) {
         console.error('timeout failed:', err);
         await message.reply("I couldn't timeout that user (check my permissions and role position).");
@@ -146,17 +146,17 @@ export default [
     run: async ({ message, args }) => {
       if (!(await allowed(message, PermissionFlags.ModerateMembers))) return;
       const userId = args[0] ? parseUserMention(args[0]) : null;
-      if (args[0] && !userId) return message.reply('Usage: \`modlogs [@user]\`');
+      if (args[0] && !userId) return message.reply('Usage: `modlogs [@user]`');
       const query = userId
         ? 'SELECT id, action, target_id, moderator_id, reason, created_at FROM moderation_logs WHERE guild_id=$1 AND target_id=$2 ORDER BY id DESC LIMIT 20'
         : 'SELECT id, action, target_id, moderator_id, reason, created_at FROM moderation_logs WHERE guild_id=$1 ORDER BY id DESC LIMIT 20';
       const params = userId ? [message.guildId, userId] : [message.guildId];
       const { rows } = await pool.query(query, params);
-      if (!rows.length) return message.reply(userId ? \`No moderation logs for <@\${userId}>.\` : 'No moderation logs yet.');
+      if (!rows.length) return message.reply(userId ? `No moderation logs for <@${userId}>.` : 'No moderation logs yet.');
       const lines = rows.map((r) =>
-        \`#\${r.id} **\${r.action}** <@\${r.target_id}> — \${r.reason || 'No reason'} (by <@\${r.moderator_id}>, \${new Date(r.created_at).toISOString().slice(0, 10)})\`,
+        `#${r.id} **${r.action}** <@${r.target_id}> — ${r.reason || 'No reason'} (by <@${r.moderator_id}>, ${new Date(r.created_at).toISOString().slice(0, 10)})`,
       );
-      await message.reply(\`**Moderation Logs\${userId ? \` for <@\${userId}>\` : ''}**\\n\${lines.join('\\n')}\`);
+      await message.reply(`**Moderation Logs${userId ? ` for <@${userId}>` : ''}**\n${lines.join('\n')}`);
     },
   },
 ];
