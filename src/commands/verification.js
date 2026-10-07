@@ -1,4 +1,3 @@
-```js
 import { requirePerm, MANAGE } from '../util.js';
 
 const VERIFY_EMOJI = '✅';
@@ -43,4 +42,3 @@ export default [
     },
   },
 ];
-```
