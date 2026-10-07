@@ -52,7 +52,6 @@ export function registerVerificationEvents(client) {
         console.error(
           `Verification role "${MEMBER_ROLE_NAME}" was not found.`,
         );
-
         return;
       }
 
@@ -66,11 +65,33 @@ export function registerVerificationEvents(client) {
 
       if (!member) return;
 
+      // Already verified: do nothing.
+      const alreadyVerified = member.roles.cache?.has
+        ? member.roles.cache.has(memberRole.id)
+        : member.roles.some?.(
+            (role) => role.id === memberRole.id,
+          );
+
+      if (alreadyVerified) {
+        return;
+      }
+
+      // Give the Member role.
       await member.roles.add(memberRole.id);
 
       console.log(
         `Verified ${user.username ?? userId} in ${guildId}`,
       );
+
+      // Remove the user's verification reaction.
+      if (reaction.users?.remove) {
+        await reaction.users.remove(userId).catch((err) => {
+          console.error(
+            'Could not remove verification reaction:',
+            err,
+          );
+        });
+      }
     } catch (err) {
       console.error(
         'Verification reaction error:',
