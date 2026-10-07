@@ -1,5 +1,5 @@
 import { Events } from '@fluxerjs/core';
-import { requirePerm, MANAGE } from './util.js';
+import { requirePerm, MANAGE } from '../util.js';
 
 const VERIFY_EMOJI = '✅';
 const MEMBER_ROLE_NAME = 'Member';
@@ -10,6 +10,7 @@ export function registerVerificationEvents(client) {
       if (user?.bot) return;
 
       const message = reaction?.message;
+
       if (!message) return;
 
       const emoji =
@@ -54,12 +55,6 @@ export function registerVerificationEvents(client) {
       const member = await guild.members.fetch(userId);
 
       if (!member) return;
-
-      const hasRole =
-        member.roles?.cache?.has?.(memberRole.id) ??
-        false;
-
-      if (hasRole) return;
 
       await member.roles.add(memberRole.id);
 
