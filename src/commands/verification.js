@@ -1,79 +1,9 @@
-import { Events } from '@fluxerjs/core';
 import { requirePerm, MANAGE } from '../util.js';
-
-const VERIFY_EMOJI = '✅';
-const MEMBER_ROLE_NAME = 'Member';
-
-export function registerVerificationEvents(client) {
-  client.on(Events.MessageReactionAdd, async (reaction, user) => {
-    try {
-      if (user?.bot) return;
-
-      const message = reaction?.message;
-
-      if (!message) return;
-
-      const emoji =
-        reaction.emoji?.name ??
-        reaction.emoji ??
-        '';
-
-      if (emoji !== VERIFY_EMOJI) return;
-
-      const guildId =
-        message.guildId ??
-        message.guild?.id;
-
-      if (!guildId) return;
-
-      const guild =
-        message.guild ??
-        client.guilds.get(guildId);
-
-      if (!guild) return;
-
-      const roles = await guild.roles.fetch();
-
-      const memberRole = roles.find(
-        (role) => role.name === MEMBER_ROLE_NAME,
-      );
-
-      if (!memberRole) {
-        console.error(
-          `Verification role "${MEMBER_ROLE_NAME}" was not found.`,
-        );
-
-        return;
-      }
-
-      const userId =
-        user.id ??
-        user.user?.id;
-
-      if (!userId) return;
-
-      const member = await guild.members.fetch(userId);
-
-      if (!member) return;
-
-      await member.roles.add(memberRole.id);
-
-      console.log(
-        `Verified ${user.username ?? userId} in ${guildId}`,
-      );
-    } catch (err) {
-      console.error(
-        'Verification reaction error:',
-        err,
-      );
-    }
-  });
-}
 
 export default [
   {
     name: 'verify',
-    description: 'Post the server verification panel',
+    description: 'Inspect the Fluxer guild role API',
     guildOnly: true,
 
     run: async ({ message }) => {
@@ -87,29 +17,24 @@ export default [
         );
       }
 
-      const roles = await guild.roles.fetch();
-
-      const memberRole = roles.find(
-        (role) => role.name === MEMBER_ROLE_NAME,
+      console.log('GUILD ROLE DEBUG');
+      console.log(
+        'guild.roles:',
+        guild.roles,
+      );
+      console.log(
+        'guild.roles keys:',
+        guild.roles
+          ? Object.keys(guild.roles)
+          : 'undefined',
+      );
+      console.log(
+        'guild keys:',
+        Object.keys(guild),
       );
 
-      if (!memberRole) {
-        return message.reply(
-          `I couldn't find the \`${MEMBER_ROLE_NAME}\` role.`,
-        );
-      }
-
-      const panel =
-        '**🔐 Server Verification**\n\n' +
-        'Welcome to the server!\n\n' +
-        `React with ${VERIFY_EMOJI} below to verify yourself and receive the **${MEMBER_ROLE_NAME}** role.`;
-
-      const sent = await message.channel.send(panel);
-
-      await sent.react(VERIFY_EMOJI);
-
-      return message.reply(
-        'Verification panel posted.',
+      await message.reply(
+        'Role API diagnostic sent to Railway logs.',
       );
     },
   },
