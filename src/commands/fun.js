@@ -1,4 +1,11 @@
-const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
+const pick = (arr) => arr[Math.floor(Math.random() * arr.length)  {
+    name: 'coinflip',
+    aliases: ['cf'],
+    description: 'Flip a coin: coinflip',
+    run: ({ message }) =>
+      message.reply(Math.random() < 0.5 ? '🪙 Heads!' : '🪙 Tails!'),
+  },
+];
 
 const BALL = [
   'It is certain.', 'Without a doubt.', 'Yes, definitely.', 'Most likely.', 'Signs point to yes.',
