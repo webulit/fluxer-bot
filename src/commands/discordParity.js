@@ -101,11 +101,26 @@ add('priority','Set ticket priority',async({message,args})=>{if(!(await mod(mess
 // Music command names preserved as prefix commands.
 for(const n of ['join','play','queue','nowplaying','music']) add(n,'Music command',async({message,args})=>message.reply('Music command '+n+' received'+(args.length?' - '+args.join(' '):'')+'.'));
 
+// Real purge implementation. Fluxer.js supports channel.bulkDelete(count).
+add('purge','Purge recent messages: purge <1-100>',async({message,args})=>{
+  if (!(await requirePerm(message, PermissionFlags.ManageMessages))) return;
+  const amount=Number(args[0]);
+  if (!Number.isInteger(amount)||amount<1||amount>100) return message.reply('Usage: `purge <1-100>`');
+  const channel=await getChannel(message);
+  try {
+    await channel.bulkDelete(amount+1);
+    await channel.send('🧹 Deleted '+amount+' messages.');
+  } catch (err) {
+    console.error('purge failed:',err);
+    await message.reply("I couldn't purge messages. Make sure I have View Channel, Read Message History, and Manage Messages permissions.");
+  }
+});
+
 // Additional Discord command names / compatibility
 for(const [n,d] of [
 
  ['gcreate','Create giveaway'],['gdelete','Delete giveaway'],['gend','End giveaway'],['greroll','Reroll giveaway'],
- ['massban','Mass ban'],['masskick','Mass kick'],['lock','Lock channel'],['unlock','Unlock channel'],['purge','Purge messages']
+ ['massban','Mass ban'],['masskick','Mass kick'],['lock','Lock channel'],['unlock','Unlock channel']
 ]) if(!commands.some(c=>c.name===n)) add(n,d,async({message})=>message.reply(n+' is available through the Fluxer prefix system.'));
 
 export default commands;
