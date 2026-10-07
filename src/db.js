@@ -65,6 +65,16 @@ export async function migrate() {
       qty      INTEGER NOT NULL DEFAULT 1,
       PRIMARY KEY (guild_id, user_id, item_id)
     );
+
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS bank BIGINT NOT NULL DEFAULT 0;
+
+    CREATE TABLE IF NOT EXISTS cooldowns (
+      guild_id   TEXT NOT NULL,
+      user_id    TEXT NOT NULL,
+      action     TEXT NOT NULL,
+      expires_at TIMESTAMPTZ NOT NULL,
+      PRIMARY KEY (guild_id, user_id, action)
+    );
   `);
 }
 
