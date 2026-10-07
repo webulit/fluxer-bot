@@ -1,5 +1,4 @@
 import economy from './economy.js';
-import economyplus from './economyplus.js';
 import fun from './fun.js';
 import games from './games.js';
 import leveling from './leveling.js';
@@ -13,7 +12,6 @@ import verification from './verification.js';
 
 export default [
   ...economy,
-  ...economyplus,
   ...fun,
   ...games,
   ...leveling,
