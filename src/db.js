@@ -19,6 +19,23 @@ export async function migrate() {
     );
     ALTER TABLE users ADD COLUMN IF NOT EXISTS last_work TIMESTAMPTZ;
 
+    CREATE TABLE IF NOT EXISTS moderation_logs (
+      id           SERIAL PRIMARY KEY,
+      guild_id     TEXT NOT NULL,
+      action       TEXT NOT NULL,
+      target_id    TEXT NOT NULL,
+      moderator_id TEXT NOT NULL,
+      reason       TEXT,
+      metadata     JSONB NOT NULL DEFAULT '{}'::jsonb,
+      created_at   TIMESTAMPTZ NOT NULL DEFAULT now()
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_moderation_logs_guild_created
+      ON moderation_logs (guild_id, created_at DESC);
+
+    CREATE INDEX IF NOT EXISTS idx_moderation_logs_target
+      ON moderation_logs (guild_id, target_id, created_at DESC);
+
     CREATE TABLE IF NOT EXISTS warnings (
       id         SERIAL PRIMARY KEY,
       guild_id   TEXT NOT NULL,
