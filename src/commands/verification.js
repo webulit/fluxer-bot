@@ -19,86 +19,41 @@ function findMemberRole(guild) {
 }
 
 export function registerVerificationEvents(client) {
-  client.on(Events.MessageReactionAdd, async (reaction, user) => {
-    try {
-      if (user?.bot) return;
-
-      const message = reaction?.message;
-
-      if (!message) return;
-
-      const emoji =
-        reaction.emoji?.name ??
-        reaction.emoji ??
-        '';
-
-      if (emoji !== VERIFY_EMOJI) return;
-
-      const guildId =
-        message.guildId ??
-        message.guild?.id;
-
-      if (!guildId) return;
-
-      const guild =
-        message.guild ??
-        client.guilds.get(guildId);
-
-      if (!guild) return;
-
-      const memberRole = findMemberRole(guild);
-
-      if (!memberRole) {
-        console.error(
-          `Verification role "${MEMBER_ROLE_NAME}" was not found.`,
-        );
-        return;
-      }
-
-      const userId =
-        user.id ??
-        user.user?.id;
-
-      if (!userId) return;
-
-      const member = await guild.members.fetch(userId);
-
-      if (!member) return;
-
-      // Already verified: do nothing.
-      const alreadyVerified = member.roles.cache?.has
-        ? member.roles.cache.has(memberRole.id)
-        : member.roles.some?.(
-            (role) => role.id === memberRole.id,
-          );
-
-      if (alreadyVerified) {
-        return;
-      }
-
-      // Give the Member role.
-      await member.roles.add(memberRole.id);
-
+  client.on(
+    Events.MessageReactionAdd,
+    async (reaction, user) => {
       console.log(
-        `Verified ${user.username ?? userId} in ${guildId}`,
+        '=== VERIFICATION REACTION EVENT ===',
       );
 
-      // Remove the user's verification reaction.
-      if (reaction.users?.remove) {
-        await reaction.users.remove(userId).catch((err) => {
-          console.error(
-            'Could not remove verification reaction:',
-            err,
-          );
-        });
+      try {
+        console.log(
+          'Reaction:',
+          JSON.stringify(reaction, null, 2),
+        );
+
+        console.log(
+          'User:',
+          JSON.stringify(user, null, 2),
+        );
+
+        console.log(
+          'Reaction keys:',
+          Object.keys(reaction ?? {}),
+        );
+
+        console.log(
+          'User keys:',
+          Object.keys(user ?? {}),
+        );
+      } catch (err) {
+        console.error(
+          'Reaction diagnostic error:',
+          err,
+        );
       }
-    } catch (err) {
-      console.error(
-        'Verification reaction error:',
-        err,
-      );
-    }
-  });
+    },
+  );
 }
 
 export default [
@@ -108,7 +63,9 @@ export default [
     guildOnly: true,
 
     run: async ({ message }) => {
-      if (!(await requirePerm(message, MANAGE))) return;
+      if (!(await requirePerm(message, MANAGE))) {
+        return;
+      }
 
       const guild = message.guild;
 
