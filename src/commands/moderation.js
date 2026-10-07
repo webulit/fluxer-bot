@@ -2,6 +2,13 @@ import { PermissionFlags, parseUserMention } from '@fluxerjs/core';
 import { getGuild, hasPerm } from '../util.js';
 import { pool } from '../db.js';
 
+async function logAction(message, action, targetId, reason = null) {
+  await pool.query(
+    'INSERT INTO moderation_logs (guild_id, action, target_id, moderator_id, reason) VALUES ($1,$2,$3,$4,$5)',
+    [message.guildId, action, targetId, message.author.id, reason],
+  );
+}
+
 async function allowed(message, flag) {
   if (await hasPerm(message, flag)) return true;
   await message.reply("You don't have permission to do that.");
@@ -20,6 +27,7 @@ export default [
       const guild = await getGuild(message);
       try {
         await guild.kick(userId);
+        await logAction(message, 'kick', userId, args.slice(1).join(' ') || 'No reason provided');
         await message.reply(`Kicked <@${userId}>.`);
       } catch {
         await message.reply("I couldn't kick that user (check my permissions and role position).");
@@ -37,6 +45,7 @@ export default [
       const guild = await getGuild(message);
       try {
         await guild.ban(userId, { reason: args.slice(1).join(' ') || undefined, deleteMessageDays: 0 });
+        await logAction(message, 'ban', userId, args.slice(1).join(' ') || 'No reason provided');
         await message.reply(`Banned <@${userId}>.`);
       } catch {
         await message.reply("I couldn't ban that user (check my permissions and role position).");
@@ -54,6 +63,7 @@ export default [
       const guild = await getGuild(message);
       try {
         await guild.unban(userId);
+        await logAction(message, 'unban', userId);
         await message.reply(`Unbanned <@${userId}>.`);
       } catch {
         await message.reply("I couldn't unban that user.");
@@ -73,6 +83,7 @@ export default [
         'INSERT INTO warnings (guild_id, user_id, mod_id, reason) VALUES ($1,$2,$3,$4)',
         [message.guildId, userId, message.author.id, reason],
       );
+      await logAction(message, 'warn', userId, reason);
       await message.reply(`Warned <@${userId}>: ${reason}`);
     },
   },
