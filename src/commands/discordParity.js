@@ -103,7 +103,7 @@ for(const n of ['join','play','queue','nowplaying','music']) add(n,'Music comman
 
 // Additional Discord command names / compatibility
 for(const [n,d] of [
- ['autorole','Configure auto role'],['welcome','Configure welcome'],['setwelcome','Set welcome channel'],['welcomemsg','Set welcome message'],['setgoodbye','Set goodbye channel'],['goodbyemsg','Set goodbye message'],
+
  ['gcreate','Create giveaway'],['gdelete','Delete giveaway'],['gend','End giveaway'],['greroll','Reroll giveaway'],
  ['massban','Mass ban'],['masskick','Mass kick'],['lock','Lock channel'],['unlock','Unlock channel'],['purge','Purge messages']
 ]) if(!commands.some(c=>c.name===n)) add(n,d,async({message})=>message.reply(n+' is available through the Fluxer prefix system.'));
